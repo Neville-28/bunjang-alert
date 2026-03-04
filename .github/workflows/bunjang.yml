@@ -1,0 +1,38 @@
+name: bunjang-alert
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # 每5分钟（UTC）
+  workflow_dispatch:         # 允许你手动点Run测试
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run alert
+        env:
+          SMTP_HOST: smtp.qq.com
+          SMTP_PORT: "587"
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          MAIL_TO:   ${{ secrets.MAIL_TO }}
+          KEYWORD:   ${{ secrets.KEYWORD }}
+        run: python bunjang_alert.py
+
+      - name: Upload seen state
+        uses: actions/upload-artifact@v4
+        with:
+          name: bunjang-seen
+          path: bunjang_seen.json
+          if-no-files-found: ignore
