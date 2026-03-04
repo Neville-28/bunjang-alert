@@ -2,8 +2,11 @@ name: bunjang-alert
 
 on:
   schedule:
-    - cron: "*/5 * * * *"   # 每5分钟（UTC）
+    - cron: "*/5 * * * *"
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   run:
@@ -11,14 +14,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Restore state cache
-        uses: actions/cache@v4
-        with:
-          path: bunjang_state.json
-          key: bunjang-state-${{ github.ref_name }}
-          restore-keys: |
-            bunjang-state-
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -38,8 +33,14 @@ jobs:
           KEYWORD:   ${{ secrets.KEYWORD }}
         run: python bunjang_alert.py
 
-      - name: Save state cache
-        uses: actions/cache@v4
-        with:
-          path: bunjang_state.json
-          key: bunjang-state-${{ github.ref_name }}-${{ github.run_id }}
+      - name: Commit state file
+        run: |
+          if [ -f bunjang_state.json ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add bunjang_state.json
+            git commit -m "Update bunjang state" || echo "No changes to commit"
+            git push
+          else
+            echo "No bunjang_state.json found"
+          fi
