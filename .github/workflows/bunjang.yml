@@ -3,7 +3,7 @@ name: bunjang-alert
 on:
   schedule:
     - cron: "*/5 * * * *"   # 每5分钟（UTC）
-  workflow_dispatch:         # 允许你手动点Run测试
+  workflow_dispatch:
 
 jobs:
   run:
@@ -11,6 +11,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Restore state cache
+        uses: actions/cache@v4
+        with:
+          path: bunjang_state.json
+          key: bunjang-state-${{ github.ref_name }}
+          restore-keys: |
+            bunjang-state-
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -30,9 +38,8 @@ jobs:
           KEYWORD:   ${{ secrets.KEYWORD }}
         run: python bunjang_alert.py
 
-      - name: Upload seen state
-        uses: actions/upload-artifact@v4
+      - name: Save state cache
+        uses: actions/cache@v4
         with:
-          name: bunjang-seen
-          path: bunjang_seen.json
-          if-no-files-found: ignore
+          path: bunjang_state.json
+          key: bunjang-state-${{ github.ref_name }}-${{ github.run_id }}
