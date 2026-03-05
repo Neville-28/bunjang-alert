@@ -179,11 +179,28 @@ def run_once(keyword: str):
     print("Sent:", title)
 
 import time
+import threading
+from flask import Flask
 
-if __name__ == "__main__":
+app = Flask(__name__)
+
+@app.get("/")
+def home():
+    return "ok", 200
+
+def monitor_loop():
     while True:
         try:
             run_once(KEYWORD)
         except Exception as e:
             print("ERROR:", repr(e))
-        time.sleep(60)  # 每60秒检查一次
+        time.sleep(60)
+
+if __name__ == "__main__":
+    # 后台线程跑监控
+    t = threading.Thread(target=monitor_loop, daemon=True)
+    t.start()
+
+    # Render 会注入 PORT 环境变量
+    port = int(os.getenv("PORT", "10000"))
+    app.run(host="0.0.0.0", port=port)
