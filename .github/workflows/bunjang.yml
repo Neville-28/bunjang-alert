@@ -1,5 +1,8 @@
 name: bunjang-alert
 
+concurrency:
+  group: bunjang-alert
+  cancel-in-progress: true
 on:
   schedule:
     - cron: "*/5 * * * *"
