@@ -178,5 +178,12 @@ def run_once(keyword: str):
 
     print("Sent:", title)
 
+import time
+
 if __name__ == "__main__":
-    run_once(KEYWORD)
+    while True:
+        try:
+            run_once(KEYWORD)
+        except Exception as e:
+            print("ERROR:", repr(e))
+        time.sleep(60)  # 每60秒检查一次
