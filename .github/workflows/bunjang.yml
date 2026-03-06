@@ -5,7 +5,7 @@ concurrency:
   cancel-in-progress: true
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:
